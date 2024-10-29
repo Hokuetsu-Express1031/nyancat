@@ -1,23 +1,33 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スロットゲーム</title>
     <link rel="stylesheet" href="css.css">
+    <title>スロットゲーム</title>
 </head>
 <body>
-    <div id="slots">
-        <canvas id="slot1"></canvas>
-        <canvas id="slot2"></canvas>
-        <canvas id="slot3"></canvas>
+    <!-- タイマー表示エリア -->
+    <div class="timer-container">
+        <div id="timer-display">05:00</div>
+        <button id="start-timer">Start Timer</button>
     </div>
-    <button id="start-button">スタート</button>
-    <div>
-        <button id="stop-button-1">ストップ1</button>
-        <button id="stop-button-2">ストップ2</button>
-        <button id="stop-button-3">ストップ3</button>
+
+    <!-- スロット表示エリア -->
+    <div class="slot-container">
+        <canvas id="slot1" width="256" height="512"></canvas>
+        <canvas id="slot2" width="256" height="512"></canvas>
+        <canvas id="slot3" width="256" height="512"></canvas>
     </div>
+
+    <!-- ボタンエリア -->
+    <div class="button-container">
+        <button id="start-button" disabled>Start Slots</button>
+        <button id="stop-button-1" disabled>Stop Slot 1</button>
+        <button id="stop-button-2" disabled>Stop Slot 2</button>
+        <button id="stop-button-3" disabled>Stop Slot 3</button>
+    </div>
+
     <script src="js.js"></script>
 </body>
 </html>
