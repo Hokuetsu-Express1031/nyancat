@@ -86,20 +86,24 @@ function rotateSlot(slotIndex) {
 }
 
 function startSpin() {
-    if (isSpinning.some(spin => spin)) return;
+    if (isSpinning.some(spin => spin)) return; // 既に回転中なら何もしない
 
-    isSpinning = [true, true, true];
-    startButton.disabled = true; 
+    isSpinning = [true, true, true]; // 全てのスロットを回転状態に
+    startButton.disabled = true; // スタートボタンを無効にする
+
+    // ストップボタンを再度有効にする
     stopButtons.forEach(button => button.disabled = false);
 
     slotElements.forEach((slot, index) => {
-        rotateSlot(index);
+        rotateSlot(index); // 各スロットを回転開始
     });
 }
 
 function stopSlot(slotIndex) {
-    isSpinning[slotIndex] = false; 
-    stopButtons[slotIndex].disabled = true; 
+    isSpinning[slotIndex] = false; // 回転状態を解除
+    stopButtons[slotIndex].disabled = true; // 該当のストップボタンを無効にする
+
+    // 全スロットが停止したら、スタートボタンを再度有効にする
     if (!isSpinning.some(spin => spin)) {
         startButton.disabled = false;
     }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css.css">
+    <title>スロットゲーム</title>
+</head>
+<body>
+    <div id="container">
+        <div id="timer-container">
+            <button id="timer-button" class="timer-button">Start/Stop Timer</button>
+            <div id="timer-display">05:00</div>
+        </div>
+        <div id="slot-container">
+            <canvas id="slot1" width="256" height="512"></canvas>
+            <canvas id="slot2" width="256" height="512"></canvas>
+            <canvas id="slot3" width="256" height="512"></canvas>
+        </div>
+        <div id="button-container">
+            <button id="start-button" disabled>Start</button>
+            <div id="stop-buttons-container">
+                <button id="stop-button-1" disabled>Stop 1</button>
+                <button id="stop-button-2" disabled>Stop 2</button>
+                <button id="stop-button-3" disabled>Stop 3</button>
+            </div>
+        </div>
+    </div>
+    <script src="js.js"></script>
+</body>
+</html>
