@@ -15,8 +15,8 @@ let positions = [0, 0, 0]; // スロットの現在位置を保持
 
 function createImageCanvas(number) {
     const imageCanvas = document.createElement("canvas");
-    imageCanvas.width = 256; // 正方形
-    imageCanvas.height = 256; // 正方形
+    imageCanvas.width = 182; // 正方形
+    imageCanvas.height = 182; // 正方形
     const ctx = imageCanvas.getContext("2d");
     
     ctx.fillStyle = "white";
