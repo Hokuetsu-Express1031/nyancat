@@ -3,13 +3,13 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #111; /* 黒を基調とした背景色 */
+    background-color: #111;
     font-family: Arial, sans-serif;
 }
 
 #container {
     text-align: center;
-    background-color: #222; /* 濃いグレーの背景 */
+    background-color: #222;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
@@ -19,26 +19,39 @@ body {
     margin-bottom: 20px;
 }
 
-.timer-button {
+#timer-button, #reset-button {
     padding: 10px 15px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #007BFF; /* タイマーボタンの背景色 */
-    color: white;
     border: none;
     border-radius: 4px;
-    transition: background-color 0.3s;
+    margin: 5px;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
-.timer-button:hover:not(:disabled) {
-    background-color: #0056b3; /* ホバー時の色 */
+#timer-button.active {
+    background-color: blue; /* タイマーボタンが押せるときの色 */
 }
 
-#timer-display {
+#reset-button.active {
+    background-color: orange; /* リセットボタンが押せるときの色 */
+}
+
+#timer-button:hover:enabled {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+#reset-button:hover:enabled {
+    background-color: #e68a00;
+    transform: scale(1.05);
+}
+
+#timer-display, #score-display {
     font-size: 24px;
     font-weight: bold;
     margin-top: 5px;
-    color: white; /* タイマー表示の色 */
+    color: white;
 }
 
 #slot-container {
@@ -60,36 +73,32 @@ canvas {
 
 #stop-buttons-container {
     display: flex;
-    justify-content: center; /* ストップボタンを横に配置 */
+    justify-content: center;
     margin-top: 10px;
 }
 
 button {
-    margin: 5px;
     padding: 10px 15px;
     font-size: 16px;
     cursor: pointer;
     border: none;
     border-radius: 4px;
-    background-color: #4CAF50; /* スロットスタートボタンの色 */
+    background-color: #4CAF50; /* スロットの各ボタンのデフォルト色 */
     color: white;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
+    margin: 5px;
 }
 
 button:disabled {
-    background-color: #555; /* グレー */
+    background-color: #555;
     cursor: not-allowed;
 }
 
 button:hover:not(:disabled) {
-    background-color: #45a049; /* ダークグリーン */
+    background-color: #45a049;
+    transform: scale(1.05);
 }
 
 #slot-container canvas {
-    margin: 0 10px; /* スロット間の空白 */
-}
-
-/* スロット内の絵のサイズを128pxに設定 */
-canvas {
-    height: 512px; /* 高さはそのままに */
+    margin: 0 10px;
 }
