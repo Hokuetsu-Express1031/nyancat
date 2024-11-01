@@ -1,3 +1,4 @@
+
 body {
     display: flex;
     justify-content: center;
@@ -102,3 +103,4 @@ button:hover:not(:disabled) {
 #slot-container canvas {
     margin: 0 10px;
 }
+

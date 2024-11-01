@@ -19,8 +19,8 @@ let intervals = []; // 各スロットのインターバルを保持
 let isSpinning = [false, false, false]; // 各スロットの回転状態を保持
 let positions = [0, 0, 0]; // スロットの現在位置を保持
 let isTimerRunning = false; // タイマーの状態
-let timerDuration = 300; // タイマーの秒数
-let remainingTime = timerDuration; // 残り時間
+let timerDuration = 0; // タイマーの秒数
+let elapsedTime = 0; // 経過時間
 let score = 0; // スコア
 let timerToggleFlag = false; // タイマーのスタート・ストップ用フラグ
 
@@ -75,7 +75,8 @@ function rotateSlot(slotIndex) {
         if (lastTime === 0) lastTime = time;
         const deltaTime = time - lastTime;
 
-        if (deltaTime >= 16) { // 60fps以上を維持するための計算
+        // 回転速度を遅くするための条件
+        if (deltaTime >= 50) { // 50msごとにスロットの位置を更新
             positions[slotIndex] = (positions[slotIndex] + 1) % images.length;
             drawSlot(slotIndex, positions[slotIndex]);
             lastTime = time;
@@ -114,19 +115,15 @@ function toggleTimer() {
         startTimer(); // タイマーを開始
     }
     timerToggleFlag = !timerToggleFlag; // フラグのトグル
+    resetButton.disabled = false;
 }
 
 function startTimer() {
     isTimerRunning = true; // タイマーを開始
     updateButtonColors(); // ボタンの色を更新
-
     intervals.push(setInterval(() => {
-        if (remainingTime > 0) {
-            remainingTime--;
-            updateTimerDisplay();
-        } else {
-            stopTimer();
-        }
+        elapsedTime++; // 経過時間をカウントアップ
+        updateTimerDisplay();
     }, 1000));
 }
 
@@ -137,10 +134,10 @@ function stopTimer() {
 }
 
 function resetGame() {
-    remainingTime = timerDuration; // 残り時間を初期化
+    elapsedTime = 0; // 経過時間を初期化
     score = 0; // スコアを初期化
     updateTimerDisplay();
-    scoreDisplay.innerText = "Score: " + score;
+    scoreDisplay.innerText = "保有コイン数: " + score;
 
     // スロットをリセット
     isSpinning = [false, false, false];
@@ -152,6 +149,9 @@ function resetGame() {
         button.style.backgroundColor = "#555"; // ストップボタンの色を変更
     });
     resetButton.disabled = true; // リセットボタンを無効化
+    stopTimer();
+    elapsedTime = 0;
+    timerToggleFlag = !timerToggleFlag;
     initializeSlots(); // スロットの初期状態を描画
     drawSlot(0, 0); // 初期状態を描画
     drawSlot(1, 0);
@@ -159,16 +159,16 @@ function resetGame() {
 }
 
 function updateTimerDisplay() {
-    const minutes = String(Math.floor(remainingTime / 60)).padStart(2, '0');
-    const seconds = String(remainingTime % 60).padStart(2, '0');
-    timerDisplay.innerText = `${minutes}:${seconds}`;
+    const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+    const seconds = String(elapsedTime % 60).padStart(2, '0');
+    timerDisplay.innerText = `${minutes}:${seconds}`; // タイマー表示を更新
 }
 
 function updateButtonColors() {
     // ボタンの色を更新する
     timerButton.style.backgroundColor = isTimerRunning ? "#00BFFF" : "green"; // タイマーが動いているときは水色、止まっているときは緑
-    resetButton.style.backgroundColor = remainingTime === 0 ? "#FFA500" : "#555"; // オレンジ
-    resetButton.disabled = remainingTime !== 0; // タイマーが0でないときは無効にする
+    resetButton.style.backgroundColor = elapsedTime === 0 ? "#FFA500" : "#555"; // オレンジ
+    resetButton.disabled = elapsedTime !== 0; // 経過時間が0でないときは無効にする
 
     // スタートボタンを有効にする条件
     startButton.disabled = !(isTimerRunning && stopButtons.every(button => button.disabled)); // タイマーが動いているかつすべてのストップボタンが押された場合
@@ -178,9 +178,9 @@ function updateButtonColors() {
 function checkScore() {
     const secondRowValues = [positions[0], positions[1], positions[2]];
     if (secondRowValues[0] === secondRowValues[1] && secondRowValues[1] === secondRowValues[2]) {
-        score *= 2; // スコアを2倍にする
+        score += 2; // スコアを2倍にする
     }
-    scoreDisplay.innerText = "Score: " + score;
+    scoreDisplay.innerText = "保有コイン数: " + score;
 }
 
 // スロットのストップボタンが押されたときの処理
@@ -188,25 +188,27 @@ function handleStopButton(index) {
     isSpinning[index] = false; // スロットの回転を停止
     stopButtons[index].style.backgroundColor = "#555"; // ストップボタンの色を変更
     checkIfAllStopped(); // すべてのストップボタンが押されたか確認
+    checkScore(); // スコアを更新
 }
 
 // すべてのストップボタンが押されたか確認
 function checkIfAllStopped() {
     if (isSpinning.every(spin => !spin)) {
         startButton.disabled = false; // スタートボタンを有効にする
-        startButton.style.backgroundColor = "green"; // スタートボタンの色を緑に変更
+        startButton.style.backgroundColor = "green"; // スタートボタンの色を緑に設定
+        stopButtons.forEach(button => button.disabled = true); // ストップボタンを無効化
     }
 }
 
-// ボタンのイベントリスナーの設定
+// イベントリスナーの設定
+startButton.addEventListener("click", startSpin);
 stopButtons.forEach((button, index) => {
     button.addEventListener("click", () => handleStopButton(index));
 });
 timerButton.addEventListener("click", toggleTimer);
 resetButton.addEventListener("click", resetGame);
-startButton.addEventListener("click", startSpin);
 
-// ゲームの初期化
-initializeSlots(); // スロットの初期状態を描画
-updateTimerDisplay(); // タイマーの初期表示を更新
-scoreDisplay.innerText = "Score: " + score; // スコアの初期表示を更新
+// 初期化
+initializeSlots();
+updateTimerDisplay(); // 初期状態のタイマー表示を更新
+resetGame(); // 初期状態をリセット
