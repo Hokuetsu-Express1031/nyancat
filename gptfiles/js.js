@@ -120,6 +120,7 @@ function toggleTimer() {
 
 function startTimer() {
     isTimerRunning = true; // タイマーを開始
+    
     updateButtonColors(); // ボタンの色を更新
     intervals.push(setInterval(() => {
         elapsedTime++; // 経過時間をカウントアップ
@@ -212,3 +213,7 @@ resetButton.addEventListener("click", resetGame);
 initializeSlots();
 updateTimerDisplay(); // 初期状態のタイマー表示を更新
 resetGame(); // 初期状態をリセット
+initializeSlots(); // スロットの初期状態を描画
+drawSlot(0, 0); // 初期状態を描画
+drawSlot(1, 0);
+drawSlot(2, 0);
