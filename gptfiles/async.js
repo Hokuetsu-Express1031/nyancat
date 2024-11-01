@@ -47,6 +47,12 @@ async function sendStartTime() {
     
 }
 
-async function send() {
-    
+async function sendScoreDate() {
+    const scoredate = {scores: score};
+
+    try {
+        const result = await postData(url, scoredate);
+    }catch{
+        
+    }
 }
