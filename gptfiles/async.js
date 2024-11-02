@@ -1,5 +1,5 @@
 
-const socket = io("http://153.125.129.24:3000"); // Socket.IOサーバーと接続
+const socket = io("http://192.168.11.50:3000"); // Socket.IOサーバーと接続
 
 // クライアントのデータ
 let score = 0; // コイン保有数

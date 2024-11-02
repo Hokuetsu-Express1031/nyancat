@@ -1,19 +1,34 @@
-const images = Array.from({ length: 10 }, (_, i) => i + 1); // 1〜10の番号を使用
+// スロットごとの画像の順番を指定する配列
+const orderArray = [
+    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,1,8,5,2,6,4,2,1,7,2,1,4,5,1,6,3,8,1,2,4,1,2,1,7,5,2,6,4,1,8], // スロット1の画像順
+    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,2,8,5,2,6,4,3,1,7,2,1,4,5,2,6,3,8,1,2,4,1,2,1,7,5,2,6,4,2,8], // スロット2の画像順
+    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,2,8,5,2,6,4,3,1,7,2,1,4,5,2,6,3,8,1,2,4,1,2,1,7,5,2,6,4,2,8]  // スロット3の画像順
+];
+
+// orderArrayに基づき画像を生成
+const images = orderArray.flat().map(number => `image/${number}.png`); // 各画像のパスを生成
+
 const slotElements = [
     document.getElementById("slot1"),
     document.getElementById("slot2"),
     document.getElementById("slot3")
 ];
+
 const startButton = document.getElementById("start-button");
 const stopButtons = [
     document.getElementById("stop-button-1"),
     document.getElementById("stop-button-2"),
     document.getElementById("stop-button-3")
 ];
+
+const loadedImages = []; // 画像を格納する配列
+
+// ゲームの初期化
 const timerButton = document.getElementById("timer-button");
 const resetButton = document.getElementById("reset-button");
 const timerDisplay = document.getElementById("timer-display");
 const scoreDisplay = document.getElementById("score-display");
+const updateInterval = 50;
 
 let intervals = []; // 各スロットのインターバルを保持
 let isSpinning = [false, false, false]; // 各スロットの回転状態を保持
@@ -23,6 +38,7 @@ let timerDuration = 0; // タイマーの秒数
 //let elapsedTime = 0; // 経過時間
 //let score = 0; // スコア
 let timerToggleFlag = false; // タイマーのスタート・ストップ用フラグ
+let stopCount = 0; 
 
 function createImageCanvas(number) {
     const imageCanvas = document.createElement("canvas");
@@ -42,60 +58,90 @@ function createImageCanvas(number) {
     return imageCanvas;
 }
 
-function initializeSlots() {
-    slotElements.forEach((slot, index) => {
-        const ctx = slot.getContext("2d");
-        const image = createImageCanvas(images[0]);
-        ctx.drawImage(image, 0, 0, slot.width, slot.height);
+function preloadImages() {
+    return new Promise((resolve) => {
+        let imagesLoaded = 0;
+
+        images.forEach((src, index) => {
+            const img = new Image();
+            img.src = src; // 画像のパスを設定
+            img.onload = () => {
+                loadedImages[index] = img; // 画像を読み込んだら格納
+                console.log(`Loaded image: ${src}`); // 読み込んだ画像のパスを表示
+                imagesLoaded++;
+                if (imagesLoaded === images.length) {
+                    resolve(); // すべての画像が読み込まれたら解決
+                }
+            };
+            
+        });
     });
 }
 
-function drawSlot(slotIndex, position) {
-    const ctx = slotElements[slotIndex].getContext("2d");
-    const slotHeight = slotElements[slotIndex].height;
-    const slotWidth = slotElements[slotIndex].width;
+function initializeSlots() {
+    slotElements.forEach((slot, slotIndex) => {
+        const ctx = slot.getContext("2d");
+        const slotImages = orderArray[slotIndex]; // 現在のスロットの画像順を取得
 
-    ctx.clearRect(0, 0, slotWidth, slotHeight);
+        // 各スロットに対応する画像を描画
+        slotImages.forEach((imageIndex, index) => {
+            ctx.drawImage(loadedImages[images.indexOf(`image/${imageIndex}.png`)], 
+                          0, 
+                          index * (slot.height / 3), // 高さに基づいて配置
+                          slot.width, 
+                          slot.height / 3);
+        });
+    });
+}
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, slotWidth, slotHeight);
 
-    for (let i = -1; i <= 1; i++) {
-        const imageIndex = (position + i + images.length) % images.length;
-        const y = (i + 1) * (slotHeight / 3) + 205; // 205px下に描画
-        const image = createImageCanvas(images[imageIndex]);
-        ctx.drawImage(image, (slotWidth - 128) / 2, y - (slotHeight / 3), 128, 128);
+
+
+
+function updateSlots() {
+    for (let i = 0; i < slotElements.length; i++) {
+        const ctx = slotElements[i].getContext("2d");
+        const slotHeight = slotElements[i].height;
+        const slotWidth = slotElements[i].width;
+
+        // 背景を白色で塗りつぶす
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, slotWidth, slotHeight);
+
+        for (let j = -1; j <= 1; j++) {
+            const imageIndex = (positions[i] + j + images.length) % images.length;
+            const y = (j + 1) * (slotHeight / 3) + 195; // 画像を均等に配置
+            ctx.drawImage(loadedImages[imageIndex],
+                          (slotWidth - 128) / 2,
+                          y - (slotHeight / 3),
+                          128, 128);
+        }
     }
 }
 
-function rotateSlot(slotIndex) {
-    let lastTime = 0;
-
-    function animate(time) {
-        if (lastTime === 0) lastTime = time;
-        const deltaTime = time - lastTime;
-
-        // 回転速度を遅くするための条件
-        if (deltaTime >= 50) { // 50msごとにスロットの位置を更新
-            positions[slotIndex] = (positions[slotIndex] + 1) % images.length;
-            drawSlot(slotIndex, positions[slotIndex]);
-            lastTime = time;
+// スロットの描画を更新するためのインターバル設定
+setInterval(() => {
+    if (isSpinning.some(spin => spin)) { // どれかのスロットが回転中であれば
+        for (let i = 0; i < slotElements.length; i++) {
+            if (isSpinning[i]) {
+                positions[i] = (positions[i] + 1) % images.length; // 画像のインデックス更新
+            }
         }
-
-        if (isSpinning[slotIndex]) {
-            requestAnimationFrame(animate);
-        }
+        updateSlots(); // スロットの描画を更新
     }
-
-    requestAnimationFrame(animate);
-}
+}, updateInterval); // 定期的に描画を更新
 
 function startSpin() {
+    if (score <= 0) {
+        alert('お金を入れてね');
+        return;} 
     if (!isTimerRunning) return; // タイマーが動いていないときはスロットをスタートしない
     if (isSpinning.some(spin => spin)) return; // 既に回転中なら何もしない
-
+    score -= 1;
+    scoreDisplay.innerText = "保有コイン数: " + score;
     isSpinning = [true, true, true]; // 全てのスロットを回転状態に
     startButton.disabled = true; // スタートボタンを無効にする
+    stopCount = 0; 
     startButton.style.backgroundColor = "#555"; // スタートボタンの色を変更
 
     stopButtons.forEach(button => {
@@ -103,7 +149,7 @@ function startSpin() {
         button.style.backgroundColor = "red"; // ストップボタンの色を赤に設定
     });
 
-    slotElements.forEach((slot, index) => {
+    loadedImages.forEach((slot, index) => {
         rotateSlot(index); // 各スロットを回転開始
     });
 }
@@ -116,6 +162,7 @@ function toggleTimer() {
     }
     timerToggleFlag = !timerToggleFlag; // フラグのトグル
     resetButton.disabled = false;
+    resetButton.style.backgroundColor = "#FFA500" ; // オレンジ
     syncData();
 }
 
@@ -179,20 +226,11 @@ function updateButtonColors() {
     startButton.style.backgroundColor = startButton.disabled ? "#555" : "green"; // 押せないときはグレー、押せるときは緑
 }
 
-function checkScore() {
-    const secondRowValues = [positions[0], positions[1], positions[2]];
-    if (secondRowValues[0] === secondRowValues[1] && secondRowValues[1] === secondRowValues[2]) {
-        score += 2; // スコアを2倍にする
-    }
-    scoreDisplay.innerText = "保有コイン数: " + score;
-}
-
 // スロットのストップボタンが押されたときの処理
 function handleStopButton(index) {
     isSpinning[index] = false; // スロットの回転を停止
     stopButtons[index].style.backgroundColor = "#555"; // ストップボタンの色を変更
     checkIfAllStopped(); // すべてのストップボタンが押されたか確認
-    checkScore(); // スコアを更新
 }
 
 // すべてのストップボタンが押されたか確認
@@ -201,24 +239,55 @@ function checkIfAllStopped() {
         startButton.disabled = false; // スタートボタンを有効にする
         startButton.style.backgroundColor = "green"; // スタートボタンの色を緑に設定
         stopButtons.forEach(button => button.disabled = true); // ストップボタンを無効化
+        stopCount = 0; // スペースキー押下回数をリセット
+        checkScore(); // スコアを更新
     }
 }
+
+//スコア計算
+function checkScore() {
+    const secondRowValues = [positions[0], positions[1], positions[2]];
+    if (secondRowValues[0] === secondRowValues[1] && secondRowValues[1] === secondRowValues[2]) {
+        score += 2; // スコアを2倍にする
+        alert("Congratulations!");
+    }
+    scoreDisplay.innerText = "保有コイン数: " + score;
+}
+
+function handleKeyPress(event) {
+    if (event.code === 'Space') {
+        if (stopCount < 3 && isSpinning[stopCount]) { // 3回までスロットを停止
+            handleStopButton(stopCount); // スロットを停止
+            stopCount++; // 次のスロットに進むためカウントを増加
+        }
+    }
+}
+
+function IntoCoin() {
+    score += 5; // スコアを2倍にする
+    scoreDisplay.innerText = "保有コイン数: " + score;
+}
+
 
 // イベントリスナーの設定
 startButton.addEventListener("click", startSpin);
 stopButtons.forEach((button, index) => {
     button.addEventListener("click", () => handleStopButton(index));
 });
+document.addEventListener('keydown', handleKeyPress);
 timerButton.addEventListener("click", toggleTimer);
 resetButton.addEventListener("click", resetGame);
 
+timerButton.addEventListener("click", IntoCoin)
 
-drawSlot(0, 0); // 初期状態を描画
-drawSlot(1, 0);
-drawSlot(2, 0);
 
 // 初期化
-initializeSlots();
+preloadImages().then(() => {
+    initializeSlots(); // 画像が読み込まれた後にスロットを初期化
+});
 updateTimerDisplay(); // 初期状態のタイマー表示を更新
 resetGame(); // 初期状態をリセット
 initializeSlots(); // スロットの初期状態を描画
+drawSlot(0, 0); // 初期状態を描画
+drawSlot(1, 0);
+drawSlot(2, 0);

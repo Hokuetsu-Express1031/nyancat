@@ -8,6 +8,7 @@
     <script src="socket.io/socket.io.js"></script>
     <script src="async.js" defer></script>
     <script src="js.js" defer></script>
+    <script src="score.js"></script>
 </head>
 </head>
 <body>
@@ -15,8 +16,23 @@
         <div id="timer-container">
             <button id="timer-button">Start/Stop Timer</button>
             <button id="reset-button" disabled>Reset</button>
+            <button id="help-button">help</button>
             <div id="timer-display">00:00</div>
             <div id="score-display">保有コイン数: 0</div>
+        </div>
+        <!-- ポップアップ内容 -->
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <span id="close-popup" class="close-button">&times;</span>
+                <p>へあいおｈふぉえいおｆじひｈｖげ</p>
+                <img src="images/Polygon 1.png">
+             </div>
+        </div>
+        <!--<img src="images/Polygon 1.png" id="sankaku">!-->
+        <div id="slot-name">
+            <p>リール１</p>
+            <p>リール２</p>
+            <p>リール３</p>
         </div>
         <div id="slot-container">
             <canvas id="slot1" width="256" height="512"></canvas>
