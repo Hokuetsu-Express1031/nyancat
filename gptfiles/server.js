@@ -1,13 +1,13 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const cors = require('cors'); // CORSをインポート
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// CORSの設定を追加
+// CORSの設定
 app.use(cors({
     origin: '*', // すべてのオリジンを許可
     methods: ['GET', 'POST'], // 許可するHTTPメソッド
@@ -16,10 +16,9 @@ app.use(cors({
 
 io.on('connection', (socket) => {
     console.log('A user connected');
-    
+
     socket.on('scoreUpdate', (data) => {
         console.log('Score updated:', data);
-        // クライアントにスコアの更新を返す
         socket.emit('scoreUpdate', { score: data.score });
     });
 });
