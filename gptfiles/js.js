@@ -20,8 +20,8 @@ let isSpinning = [false, false, false]; // 各スロットの回転状態を保�
 let positions = [0, 0, 0]; // スロットの現在位置を保持
 let isTimerRunning = false; // タイマーの状態
 let timerDuration = 0; // タイマーの秒数
-let elapsedTime = 0; // 経過時間
-let score = 0; // スコア
+//let elapsedTime = 0; // 経過時間
+//let score = 0; // スコア
 let timerToggleFlag = false; // タイマーのスタート・ストップ用フラグ
 
 function createImageCanvas(number) {
@@ -116,6 +116,7 @@ function toggleTimer() {
     }
     timerToggleFlag = !timerToggleFlag; // フラグのトグル
     resetButton.disabled = false;
+    syncData();
 }
 
 function startTimer() {
@@ -126,12 +127,14 @@ function startTimer() {
         elapsedTime++; // 経過時間をカウントアップ
         updateTimerDisplay();
     }, 1000));
+    syncData();
 }
 
 function stopTimer() {
     isTimerRunning = false; // タイマーを停止
     clearInterval(intervals.pop());
     updateButtonColors(); // ボタンの色を更新
+    syncData();
 }
 
 function resetGame() {
@@ -209,11 +212,13 @@ stopButtons.forEach((button, index) => {
 timerButton.addEventListener("click", toggleTimer);
 resetButton.addEventListener("click", resetGame);
 
+
+drawSlot(0, 0); // 初期状態を描画
+drawSlot(1, 0);
+drawSlot(2, 0);
+
 // 初期化
 initializeSlots();
 updateTimerDisplay(); // 初期状態のタイマー表示を更新
 resetGame(); // 初期状態をリセット
 initializeSlots(); // スロットの初期状態を描画
-drawSlot(0, 0); // 初期状態を描画
-drawSlot(1, 0);
-drawSlot(2, 0);

@@ -1,58 +1,25 @@
-// asyncHTTP.js
 
-const url = 'http://153.125.129.24';
-// 非同期通信を行う関数
-async function postData(url, data) {
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
+const socket = io("http://153.125.129.24:3000"); // Socket.IOサーバーと接続
 
-        if (!response.ok) {
-            throw new Error(`HTTPエラー: ${response.status}`);
-        }
+// クライアントのデータ
+let score = 0; // コイン保有数
+let elapsedTime = 0; // タイマーの経過時間
 
-        return await response.json();
-    } catch (error) {
-        console.error('通信エラー:', error);
-        throw error;
-    }
+// サーバーにデータを送信する関数
+function syncData() {
+    socket.emit("syncData", { score, elapsedTime });
 }
 
-// フォームの内容をサーバーに送信し、レスポンスを表示する関数
-async function sendUserData() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-
-    // 入力内容をオブジェクトにまとめる
-    const userData = { name: name, age: Number(age) };
-
-    try {
-        const result = await postData(url, userData);
-        // サーバーからのレスポンスをHTMLに適用
-        document.getElementById('response').innerText = result.message;
-    } catch (error) {
-        console.error('データ送信エラー:', error);
-        document.getElementById('response').innerText = 'データ送信に失敗しました';
-    }
+// スロットマシンのイベントやタイマーの更新ごとに同期
+function updateScore(newScore) {
+    score = newScore;
+    syncData();
 }
 
-async function sendStartTime() {
-    const url = 'http://153.125.129.24';
-    
-    
+function updateElapsedTime(newTime) {
+    elapsedTime = newTime;
+    syncData();
 }
 
-async function sendScoreDate() {
-    const scoredate = {scores: score};
-
-    try {
-        const result = await postData(url, scoredate);
-    }catch{
-        
-    }
-}
+// 必要に応じてエクスポート
+//export { syncData, updateScore, updateElapsedTime };
