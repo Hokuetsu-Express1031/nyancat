@@ -1,29 +1,34 @@
 const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
 const cors = require('cors');
-
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const PORT = 3000;
 
 // CORSの設定
-app.use(cors({
-    origin: '*', // すべてのオリジンを許可
-    methods: ['GET', 'POST'], // 許可するHTTPメソッド
-    allowedHeaders: ['Content-Type'] // 許可するヘッダー
-}));
+app.use(cors());
+app.use(express.json()); // JSONリクエストをパース
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
+// データを保持する配列
+const receivedData = [];
 
-    socket.on('scoreUpdate', (data) => {
-        console.log('Score updated:', data);
-        socket.emit('scoreUpdate', { score: data.score });
-    });
+// クライアントからのデータを受信
+app.post('/data', (req, res) => {
+    const data = req.body;
+    receivedData.push(data); // データを配列に保存
+    console.log('データを受信:', data);
+    res.status(200).send('データを受信しました');
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// 管理ページ用エンドポイント
+app.get('/admin', (req, res) => {
+    // 保存されているデータをJSONで返す
+    res.json(receivedData);
+});
+
+// 管理ページHTMLを提供するルート
+app.get('/admin-page', (req, res) => {
+    res.sendFile(__dirname + '/admin.html');
+});
+
+app.listen(PORT, () => {
+    console.log(`サーバーがポート ${PORT} で稼働中`);
 });
