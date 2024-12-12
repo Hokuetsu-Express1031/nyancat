@@ -1,8 +1,8 @@
 // スロットごとの画像の順番を指定する配列
 const orderArray = [
-    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,1,8,5,2,6,4,2,1,7,2,1,4,5,1,6,3,8,1,2,4,1,2,1,7,5,2,6,4,1,8], // スロット1の画像順
-    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,2,8,5,2,6,4,3,1,7,2,1,4,5,2,6,3,8,1,2,4,1,2,1,7,5,2,6,4,2,8], // スロット2の画像順
-    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,2,8,5,2,6,4,3,1,7,2,1,4,5,2,6,3,8,1,2,4,1,2,1,7,5,2,6,4,2,8]  // スロット3の画像順
+    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,1,5,2,6,4,2,1,7,2,1,4,5,1,6,3,1,2,4,1,2,1,7,5,2,6,4,1], // スロット1の画像順
+    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,2,5,2,6,4,3,1,7,2,1,4,5,2,6,3,1,2,4,1,2,1,7,5,2,6,4,2], // スロット2の画像順
+    [1,2,3,4,1,5,2,6,1,7,2,1,4,3,2,5,2,6,4,3,1,7,2,1,4,5,2,6,3,1,2,4,1,2,1,7,5,2,6,4,2]  // スロット3の画像順 44
 ];
 
 // orderArrayに基づき画像を生成
@@ -20,6 +20,7 @@ const stopButtons = [
     document.getElementById("stop-button-2"),
     document.getElementById("stop-button-3")
 ];
+const intoButton = document.getElementById("into-button");
 
 const loadedImages = []; // 画像を格納する配列
 
@@ -244,22 +245,15 @@ function checkIfAllStopped() {
     }
 }
 
-//スコア計算
-function checkScore() {
-    const secondRowValues = [positions[0], positions[1], positions[2]];
-    if (secondRowValues[0] === secondRowValues[1] && secondRowValues[1] === secondRowValues[2]) {
-        score += 2; // スコアを2倍にする
-        alert("Congratulations!");
-    }
-    scoreDisplay.innerText = "保有コイン数: " + score;
-}
-
 function handleKeyPress(event) {
     if (event.code === 'Space') {
         if (stopCount < 3 && isSpinning[stopCount]) { // 3回までスロットを停止
             handleStopButton(stopCount); // スロットを停止
             stopCount++; // 次のスロットに進むためカウントを増加
         }
+    }
+    if (event.code === 'KeyB') {
+        startSpin();
     }
 }
 
@@ -277,8 +271,7 @@ stopButtons.forEach((button, index) => {
 document.addEventListener('keydown', handleKeyPress);
 timerButton.addEventListener("click", toggleTimer);
 resetButton.addEventListener("click", resetGame);
-
-timerButton.addEventListener("click", IntoCoin)
+intoButton.addEventListener("click", IntoCoin)
 
 
 // 初期化

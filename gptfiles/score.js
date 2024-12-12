@@ -1,13 +1,34 @@
-// score.js
-
 function checkScore() {
-    const secondRowValues = [positions[0], positions[1], positions[2]];
+    // スロットの正確な位置にある画像を取得
+    const secondRowValues = [
+        orderArray[0][positions[0] % orderArray[0].length],
+        orderArray[1][positions[1] % orderArray[1].length],
+        orderArray[2][positions[2] % orderArray[2].length]
+    ];
+
+    const scoreMap = {
+        1: 5,
+        2: 10,
+        3: 15,
+        4: 20,
+        5: 30,
+        6: 40,
+        7: 100,
+        8: 300
+    };
+
     if (secondRowValues[0] === secondRowValues[1] && secondRowValues[1] === secondRowValues[2]) {
-        score += 2; // スコアを2倍にする
-        alert("Congratulations!");
+        const matchedValue = secondRowValues[0];
+        
+        if (scoreMap[matchedValue]) {
+            score += scoreMap[matchedValue];
+            alert(`Congratulations! You've won ${scoreMap[matchedValue]} coins!`);
+        }
     }
+
     scoreDisplay.innerText = "保有コイン数: " + score;
 }
+
 
 
 
